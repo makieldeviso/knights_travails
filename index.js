@@ -6,7 +6,6 @@ class Tile {
     constructor (x, y) {
         this.x = x;
         this.y = y;
-        this.adjPoints = [];
         this.adjTiles = [];
     }
 
@@ -36,7 +35,7 @@ class Tile {
             const isMoveYValid = moveY >= 0 && moveY <= maxIndex;
 
             if (isMoveXValid && isMoveYValid) {
-                this.adjPoints.push(moves[move]);
+                this.adjTiles.push(board[`${moveX},${moveY}`]);
             }
         });
     }
@@ -68,9 +67,6 @@ const createBoard = function () {
     Object.keys(adjList).forEach(tile => {
         adjList[tile].makeAdjPoints(adjList);
     })
-
-
-
 
     return adjList;
 }
