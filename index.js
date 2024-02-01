@@ -7,9 +7,10 @@ class Tile {
         this.x = x;
         this.y = y;
         this.adjPoints = [];
+        this.adjTiles = [];
     }
 
-    makeAdjPoints () {
+    makeAdjPoints (board) {
         const a = this.x;
         const b = this.y;
         // Log all possible L moves of the knight
@@ -40,29 +41,22 @@ class Tile {
         });
     }
 
-    // makeAdjTiles() {
-
-    // }
-
 }
 
 const createBoard = function () { 
     const adjList = {};
-    let nodeName = 0
     let xCoor = 0;
     let yCoor = 0;
 
     while (xCoor <= maxIndex && yCoor <= maxIndex) {
+        const nodeName = `${xCoor},${yCoor}`;
 
         adjList[`${nodeName}`] = new Tile(xCoor, yCoor);
         
-        nodeName ++;
-
         // if yCoor reached maxIndex, increment xCoor by 1 and reset yCoor to 0, else increment yCoor by 1
         if (yCoor === maxIndex) {
             xCoor ++;
             yCoor = 0;
-            console.log('waw');
 
         } else if (yCoor <= maxIndex) {
             yCoor ++;
@@ -70,12 +64,16 @@ const createBoard = function () {
 
     }
 
+    // Assign adjacent point/ Possible moves of the knight
     Object.keys(adjList).forEach(tile => {
-        adjList[tile].makeAdjPoints();
+        adjList[tile].makeAdjPoints(adjList);
     })
+
+
+
 
     return adjList;
 }
 
-
-console.log(createBoard());
+const testBoard = createBoard()
+console.log(testBoard);
