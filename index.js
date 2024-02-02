@@ -8,71 +8,110 @@ class Tile {
         this.y = y;
         this.adjTiles = [];
     }
+}
 
-    makeAdjTiles (board) {
-    // Note: board parameter receives the board object created/ adjacency list object
-        const a = this.x;
-        const b = this.y;
-        // Log all possible L moves of the knight
-        const moves = {
-            m1: [a + 2, b + 1],
-            m2: [a - 2, b + 1],
-            m3: [a + 1, b + 2],
-            m4: [a - 1, b + 2],
-            m5: [a + 2, b - 1],
-            m6: [a - 2, b - 1],
-            m7: [a + 1, b - 2],
-            m8: [a - 1, b - 2]
+class Board {
+    constructor (size) {
+        this._createBoard(size);
+        this._makeAdjTiles();
+    }
+
+    _createBoard (size) {
+        let xCoor = 0;
+        let yCoor = 0;
+
+        while (xCoor <= size && yCoor <= size) {
+            const nodeName = `${xCoor},${yCoor}`;
+
+            this[`${nodeName}`] = new Tile(xCoor, yCoor);
+        
+        // Assign Coordinates to the created tile
+        // if yCoor reached size, increment xCoor by 1 and reset yCoor to 0, else increment yCoor by 1
+            if (yCoor === size) {
+                xCoor ++;
+                yCoor = 0;
+
+            } else if (yCoor <= size) {
+                yCoor ++;
+            }   
         }
+    }
 
-        // Reiterate over all possible moves
-        Object.keys(moves).forEach(move => {
-            // If a move is within 0 and maxIndex save adjacency of tile
-            // Note: Moves that are not within conditional is out of bounds
-            const moveX = moves[move][0];
-            const moveY = moves[move][1];
-
-            const isMoveXValid = moveX >= 0 && moveX <= maxIndex;
-            const isMoveYValid = moveY >= 0 && moveY <= maxIndex;
-
-            if (isMoveXValid && isMoveYValid) {
-                this.adjTiles.push(board[`${moveX},${moveY}`]);
+    _makeAdjTiles () {
+        class Moves {
+            constructor (x, y) {
+                this.m1 = [x + 2, y + 1],
+                this.m2 = [x - 2, y + 1],
+                this.m3 = [x + 1, y + 2],
+                this.m4 = [x - 1, y + 2],
+                this.m5 = [x + 2, y - 1],
+                this.m6 = [x - 2, y - 1],
+                this.m7 = [x + 1, y - 2],
+                this.m8 = [x - 1, y - 2]
             }
-        });
-    }
 
-}
+            _validMove (board) {
+                const validTileMoves = [];
 
-const createBoard = function () { 
-    const adjList = {};
-    let xCoor = 0;
-    let yCoor = 0;
+                Object.keys(this).forEach(move => {
+                    // If a move is within 0 and maxIndex save adjacency of tile
+                    // Note: Moves that are not within conditional is out of bounds
+                    const moveX = this[move][0];
+                    const moveY = this[move][1];
+        
+                    const isMoveXValid = moveX >= 0 && moveX <= maxIndex;
+                    const isMoveYValid = moveY >= 0 && moveY <= maxIndex;
+        
+                    if (isMoveXValid && isMoveYValid) {
+                        validTileMoves.push(board[`${moveX},${moveY}`]);
+                    }
+                });
 
-    while (xCoor <= maxIndex && yCoor <= maxIndex) {
-        const nodeName = `${xCoor},${yCoor}`;
-
-        adjList[`${nodeName}`] = new Tile(xCoor, yCoor);
+                return validTileMoves;
+            }
+        }
     
-    // Assign Coordinates to the created tile
-        // if yCoor reached maxIndex, increment xCoor by 1 and reset yCoor to 0, else increment yCoor by 1
-        if (yCoor === maxIndex) {
-            xCoor ++;
-            yCoor = 0;
+        Object.keys(this).forEach(key => {
+            const tile = this[key];
+            const a = tile.x;
+            const b = tile.y;
 
-        } else if (yCoor <= maxIndex) {
-            yCoor ++;
-        }   
-
+            const moves = new Moves(a, b);
+            const validMoves = moves._validMove(this);
+            
+            this[key].adjTiles = validMoves;
+        })
     }
-
-    // Assign adjacent tiles/ Possible moves of the knight
-    // Use makeAdjTiles method for each tile
-    Object.keys(adjList).forEach(tile => {
-        adjList[tile].makeAdjTiles(adjList);
-    })
-
-    return adjList;
 }
 
-const testBoard = createBoard();
+
+
+const testBoard = new Board(boardSize);
 console.log(testBoard);
+
+
+// const knightMoves = function (origin, dest) {
+//     const originX = origin[0];
+//     const originY = origin[1];
+
+//     const destX = dest[0];
+//     const destY = dest[1];
+
+//     const queue = [origin]
+
+//     for (let moves of origin) {
+
+//     }
+
+
+//     const travese = function () {
+        
+//     }
+
+
+// }
+
+
+const testSet = new Set();
+testSet.add(1)
+console.log(testSet )
