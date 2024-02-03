@@ -1,6 +1,6 @@
 const boardSize = 8;
 const maxIndex = boardSize - 1; // coordinates starts at 0 index
-
+const maxTiles = Math.pow(boardSize, 2);
 
 class Tile {
     constructor (x, y) {
@@ -35,6 +35,14 @@ class Board {
                 yCoor ++;
             }   
         }
+    }
+
+    _checkValidTile (x, y) {
+        const isTileXValid = x >= 0 && x <= maxIndex;
+        const isTileYValid = y >= 0 && y <= maxIndex;
+    
+        const result = isTileXValid && isTileYValid ? true : false;
+        return result;
     }
 
     _makeAdjTiles () {
@@ -85,33 +93,46 @@ class Board {
 }
 
 
+const knightMoves = function (src, dst) {
+    //Check argument first if valid coordinates
+    
 
-const testBoard = new Board(boardSize);
-console.log(testBoard);
+    const board = new Board(boardSize);
+    const origin = board[`${src[0]},${src[1]}`];
+    origin.distance = 0;
+    origin.path = [origin];
 
+    const dstX = dst[0];
+    const dstY = dst[1];
 
-// const knightMoves = function (origin, dest) {
-//     const originX = origin[0];
-//     const originY = origin[1];
+    
 
-//     const destX = dest[0];
-//     const destY = dest[1];
+    const queue = [origin]
+    
+    let visited = new Set();
+    while (queue.length > 0) {
+        const current = queue.pop(); 
+        if (current.x === dstX && current.y === dstY) {
+            return current.path;
+        }
 
-//     const queue = [origin]
+        current.adjTiles.forEach(tile => {
+            if (!visited.has(tile)) {
+                tile.distance = current.distance + 1;
+                tile.path =[...current.path, tile];
+                queue.unshift(tile);
+                visited.add(tile);
+            }
+        });
 
-//     for (let moves of origin) {
+        // Avoid infinite loop, if dst is invalid
+        // If current is already visited and all tiles are visited
+        // if (visited.has(current) && visited.size >= maxTiles) {
+        //     return false;
+        // }
 
-//     }
+    }
 
+}
 
-//     const travese = function () {
-        
-//     }
-
-
-// }
-
-
-const testSet = new Set();
-testSet.add(1)
-console.log(testSet )
+console.log(knightMoves([3,3], [7,7]));
