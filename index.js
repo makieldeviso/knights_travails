@@ -1,6 +1,4 @@
-const boardSize = 8;
-const maxIndex = boardSize - 1; // coordinates starts at 0 index
-const maxTiles = Math.pow(boardSize, 2);
+const boardSize = 8; // 8 x 8  board, 64 tiles
 
 class Tile {
     constructor (x, y) {
@@ -12,7 +10,12 @@ class Tile {
 
 class Board {
     constructor (size) {
-        this._createBoard(size);
+        this.boardSize = size;
+        this.maxIndex = this.boardSize - 1;
+        this.maxTiles = Math.pow(this.boardSize, 2);
+        this.board = this._createBoard(size);
+
+        // Assign valid moves/ adjacent nodes to created board
         this._makeAdjTiles();
     }
 
@@ -20,10 +23,12 @@ class Board {
         let xCoor = 0;
         let yCoor = 0;
 
+        const board = {};
+
         while (xCoor <= size && yCoor <= size) {
             const nodeName = `${xCoor},${yCoor}`;
 
-            this[`${nodeName}`] = new Tile(xCoor, yCoor);
+            board[`${nodeName}`] = new Tile(xCoor, yCoor);
         
         // Assign Coordinates to the created tile
         // if yCoor reached size, increment xCoor by 1 and reset yCoor to 0, else increment yCoor by 1
@@ -35,11 +40,14 @@ class Board {
                 yCoor ++;
             }   
         }
+
+        return board;
+        // Assign valid tile moves/ adjacent graph nodes
     }
 
     _checkValidTile (x, y) {
-        const isTileXValid = x >= 0 && x <= maxIndex;
-        const isTileYValid = y >= 0 && y <= maxIndex;
+        const isTileXValid = x >= 0 && x <= this.maxIndex;
+        const isTileYValid = y >= 0 && y <= this.maxIndex;
     
         const result = isTileXValid && isTileYValid ? true : false;
         return result;
@@ -58,7 +66,7 @@ class Board {
                 this.m8 = [x - 1, y - 2]
             }
 
-            _validMove (board) {
+            _validMove (boardData) {
                 const validTileMoves = [];
 
                 Object.keys(this).forEach(move => {
@@ -66,73 +74,76 @@ class Board {
                     // Note: Moves that are not within conditional is out of bounds
                     const moveX = this[move][0];
                     const moveY = this[move][1];
-        
-                    const isMoveXValid = moveX >= 0 && moveX <= maxIndex;
-                    const isMoveYValid = moveY >= 0 && moveY <= maxIndex;
-        
-                    if (isMoveXValid && isMoveYValid) {
-                        validTileMoves.push(board[`${moveX},${moveY}`]);
+
+                    const checkValid = boardData._checkValidTile(moveX, moveY);
+                    if (checkValid) {
+                        validTileMoves.push(boardData.board[`${moveX},${moveY}`]);
                     }
                 });
 
                 return validTileMoves;
             }
         }
-    
-        Object.keys(this).forEach(key => {
-            const tile = this[key];
+        
+        Object.keys(this.board).forEach(key => {
+            const tile = this.board[key];
             const a = tile.x;
             const b = tile.y;
 
             const moves = new Moves(a, b);
             const validMoves = moves._validMove(this);
             
-            this[key].adjTiles = validMoves;
+            this.board[key].adjTiles = validMoves;
         })
     }
 }
 
-
 const knightMoves = function (src, dst) {
-    //Check argument first if valid coordinates
-    
+    const boardData = new Board(boardSize); // Note: boardSize argument in line one, can be edited to adjust board size
 
-    const board = new Board(boardSize);
-    const origin = board[`${src[0]},${src[1]}`];
-    origin.distance = 0;
+    // Check argument first if valid coordinates
+    const isSrcValid = boardData._checkValidTile(src[0], src[1]);
+    const isDstValid = boardData._checkValidTile(dst[0], dst[1]);
+
+    if (!isSrcValid && !isDstValid) {
+        return 'Invalid origin and destination tile.';
+    } else if (!isSrcValid) {
+        return 'Invalid origin tile.';
+    } else if (!isDstValid) {
+        return 'Invalid destination tile.';
+    } 
+
+    const origin = boardData.board[`${src[0]},${src[1]}`];
+    origin.moves = 0;
     origin.path = [origin];
 
-    const dstX = dst[0];
-    const dstY = dst[1];
-
-    
+    let visited = new Set(); // Stores visited tiles
 
     const queue = [origin]
-    
-    let visited = new Set();
+
     while (queue.length > 0) {
+
         const current = queue.pop(); 
-        if (current.x === dstX && current.y === dstY) {
-            return current.path;
+        if (current.x === dst[0] && current.y === dst[1]) {
+            const path = current.path;
+
+            // Prints result
+            console.log( `=> You made it in ${current.moves}! Here's your path:`);
+            path.forEach(path => {
+                console.log(`[${path.x},${path.y}]`);
+            });
         }
 
         current.adjTiles.forEach(tile => {
             if (!visited.has(tile)) {
-                tile.distance = current.distance + 1;
+                tile.moves = current.moves + 1;
                 tile.path =[...current.path, tile];
                 queue.unshift(tile);
                 visited.add(tile);
             }
         });
-
-        // Avoid infinite loop, if dst is invalid
-        // If current is already visited and all tiles are visited
-        // if (visited.has(current) && visited.size >= maxTiles) {
-        //     return false;
-        // }
-
     }
-
 }
 
-console.log(knightMoves([3,3], [7,7]));
+// Test
+knightMoves([3,3], [7,7]);
