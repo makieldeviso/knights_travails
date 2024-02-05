@@ -114,31 +114,40 @@ const knightMoves = function (src, dst) {
     } 
 
     const origin = boardData.board[`${src[0]},${src[1]}`];
-    origin.moves = 0;
-    origin.path = [origin];
-
+    
     let visited = new Set(); // Stores visited tiles
 
-    const queue = [origin]
+    // Queue has object component, 
+    // node -> origin tile
+    // move -> logs how many moves was made from origin to current
+    // path -> logs the nodes taken to arrive at current
+    const queue = [{node: origin, moves: 0, path: [origin]}]
 
     while (queue.length > 0) {
 
         const current = queue.pop(); 
-        if (current.x === dst[0] && current.y === dst[1]) {
+        if (current.node.x === dst[0] && current.node.y === dst[1]) {
             const path = current.path;
-
+            
             // Prints result
             console.log( `=> You made it in ${current.moves}! Here's your path:`);
             path.forEach(path => {
                 console.log(`[${path.x},${path.y}]`);
             });
-        }
 
-        current.adjTiles.forEach(tile => {
+            // 
+            return current;
+        }
+       
+        current.node.adjTiles.forEach(tile => {
             if (!visited.has(tile)) {
-                tile.moves = current.moves + 1;
-                tile.path =[...current.path, tile];
-                queue.unshift(tile);
+                const nextTile = {
+                    node: tile, 
+                    moves: current.moves + 1,
+                    path: [...current.path, tile]
+                }
+
+                queue.unshift(nextTile);
                 visited.add(tile);
             }
         });
@@ -146,4 +155,4 @@ const knightMoves = function (src, dst) {
 }
 
 // Test
-knightMoves([3,3], [7,7]);
+console.log(knightMoves([3,3], [0, 0]));
